@@ -39,10 +39,10 @@ def ingestar_datos_raw():
         # SOLUCIÓN DE ENCODING: Intentamos leer primero con UTF-8. 
         # Si falla por caracteres especiales (como pasará con Latin-1 / ANSI), se activa el fallback automático.
         try:
-            df_raw = pd.read_csv(file_path, dtype=str, encoding='utf-8')
+            df_raw = pd.read_csv(file_path, dtype=str, sep=None, engine='python', encoding='utf-8')
         except UnicodeDecodeError:
             print(f"⚠️ El archivo no está en UTF-8. Aplicando decodificación alternativa (latin-1) para preservar caracteres especiales...")
-            df_raw = pd.read_csv(file_path, dtype=str, encoding='latin-1')
+            df_raw = pd.read_csv(file_path, dtype=str, sep=None, engine='python', encoding='latin-1')
         
         # Ingesta masiva aplicando idempotencia (if_exists='replace') para asegurar que sea re-procesable
         df_raw.to_sql(table_name, con=engine, index=False, if_exists='replace', schema='dbo')
