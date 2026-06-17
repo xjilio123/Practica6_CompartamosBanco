@@ -36,16 +36,17 @@ def ingestar_datos_raw():
             
         print(f"📖 Leyendo origen: {file_path}")
         
-        # BUENA PRÁCTICA: Se lee todo con dtype=str para evitar que Pandas intente inferir 
-        # tipos de datos incorrectos debido a los errores sembrados (nulos, caracteres extraños).
-        df_raw = pd.read_csv(file_path, dtype=str, encoding='utf-8')
+        # SOLUCIÓN DE ENCODING: Intentamos leer primero con UTF-8. 
+        # Si falla por caracteres especiales (como pasará con Latin-1 / ANSI), se activa el fallback automático.
+        try:
+            df_raw = pd.read_csv(file_path, dtype=str, encoding='utf-8')
+        except UnicodeDecodeError:
+            print(f"⚠️ El archivo no está en UTF-8. Aplicando decodificación alternativa (latin-1) para preservar caracteres especiales...")
+            df_raw = pd.read_csv(file_path, dtype=str, encoding='latin-1')
         
         # Ingesta masiva aplicando idempotencia (if_exists='replace') para asegurar que sea re-procesable
         df_raw.to_sql(table_name, con=engine, index=False, if_exists='replace', schema='dbo')
         print(f"✅ Capa RAW: Tabla '{table_name}' cargada con {len(df_raw)} filas de forma exitosa.")
-        
-    print("\n🏆 ¡Fase de Ingesta RAW en SQL Server completada con éxito!")
-    print("==================================================================")
 
 if __name__ == "__main__":
     ingestar_datos_raw()
